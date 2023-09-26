@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SplitComponent } from './split/split.component';
-
+import { NotifierModule } from 'angular-notifier';
 @NgModule({
   declarations: [
     AppComponent
@@ -12,7 +12,8 @@ import { SplitComponent } from './split/split.component';
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    SplitComponent
+    SplitComponent,
+    NotifierModule
   ],
   providers: [],
   bootstrap: [AppComponent]

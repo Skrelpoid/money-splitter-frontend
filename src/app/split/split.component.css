@@ -1,14 +1,34 @@
 .right-align {
-    text-align: right;
-    appearance: textfield;
-    -moz-appearance: textfield;
+  text-align: right;
 }
 
-.right-align::-webkit-outer-spin-button,
-.right-align::-webkit-inner-spin-button {
+#euroValue {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+#euroValue::-webkit-outer-spin-button,
+#euroValue::-webkit-inner-spin-button {
   display: none;
 }
 
-button {
-  margin-left: 2rem;
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  flex: 1;
+}
+
+mat-divider {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }

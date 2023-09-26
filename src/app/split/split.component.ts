@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,9 +7,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { SplitResult } from '../split-result';
-import { SplitterService } from '../splitter.service';
 import { MatTableModule } from '@angular/material/table';
-import { MatGridListModule } from '@angular/material/grid-list';
+import {
+  MatChipSelectionChange,
+  MatChipsModule,
+} from '@angular/material/chips';
+import { MoneyHelperService } from '../service/impl/money-helper.service';
+import { ImplementationSwitcherService } from '../service/impl/implementation-switcher.service';
+import { NotifierService } from 'angular-notifier';
 
 @Component({
   selector: 'app-split',
@@ -23,13 +28,16 @@ import { MatGridListModule } from '@angular/material/grid-list';
     MatIconModule,
     MatDividerModule,
     MatTableModule,
-    MatGridListModule],
+    MatChipsModule,],
   templateUrl: './split.component.html',
   styleUrls: ['./split.component.css']
 })
 export class SplitComponent {
   @ViewChild('euroValue') euroValue!: ElementRef<HTMLInputElement>;
-  splitterService = inject(SplitterService);
+
+  notifierService = inject(NotifierService);
+  implementationSwitcher = inject(ImplementationSwitcherService);
+  moneyHelper = inject(MoneyHelperService);
   data: SplitResult[] = [];
   difference: SplitResult[] = [];
   displayedColumns: string[] = ['billOrCoin', 'count'];
@@ -39,53 +47,32 @@ export class SplitComponent {
   ranOnce: boolean = false;
 
   onFormSubmit() {
+    let splitterService = this.implementationSwitcher.getImplementation();
     let rawValue: string = this.euroValue.nativeElement.value || '0';
-    let moneyInCents = this.parseToBigInt(rawValue);
+    let moneyInCents = this.moneyHelper.parseToBigInt(rawValue);
     if (this.currentValue) this.lastValue = this.currentValue;
     this.currentValue = moneyInCents;
     let oldData = this.data;
-    this.data = this.splitterService.splitIntoBillsAndCoins(moneyInCents);
-    if (this.ranOnce) {
-      this.difference = this.splitterService.calculateDifference(oldData, this.data);
-    }
-    this.ranOnce = true;
+    splitterService.splitIntoBillsAndCoins(moneyInCents)
+      .then(result => {
+        this.data = result;
+        if (this.ranOnce) {
+          splitterService.calculateDifference(oldData, this.data)
+            .then(result => this.difference = result)
+            .catch(e => this.notifierService.notify('error', 'Fehler! Bitte versuchen Sie es später erneut'));
+        }
+        this.ranOnce = true;
+      }).catch(e => this.notifierService.notify('error', 'Fehler! Bitte versuchen Sie es später erneut'));
   }
 
-  parseToBigInt(rawValue: string): bigint {
-    let parts: string[] = rawValue.split('.');
-    let euros = parts[0];
-    let decimalPart = parts.length >= 2 ? parts[1] : '0';
-    let cents = this.toCents(decimalPart);
-    return BigInt(`${euros}${cents}`);
-  }
+  handleChipSelection(event: MatChipSelectionChange) {
+    let chip = event.source;
 
-  toCents(decimalPart: string): string {
-    if (!decimalPart || decimalPart === '0') {
-      return '00';
+    let id = chip.id;
+    if (id === 'frontendChip') {
+      this.implementationSwitcher.switchToFrontend();
+    } else if (id === 'backendChip') {
+      this.implementationSwitcher.switchToBackend();
     }
-    if (decimalPart.length == 1) {
-      return `${decimalPart}0`;
-    }
-    if (decimalPart.length > 2) {
-      return decimalPart.substring(0, 2);
-    }
-    return decimalPart;
-  }
-
-  formatCentsAsDecimal(cents: bigint | undefined): string {
-    if (!cents) return '';
-    let stringValue = cents.toString();
-    if (stringValue.length < 3) {
-      stringValue = stringValue.padStart(3, '0');
-    }
-    return stringValue.slice(0, stringValue.length - 2) + "," + stringValue.slice(stringValue.length - 2);
-  }
-
-  formatDifference(count: bigint): string {
-    let result = count.toString();
-    if (count > 0) {
-      result = '+' + result;
-    }
-    return result;
   }
 }
