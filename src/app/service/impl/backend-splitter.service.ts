@@ -24,7 +24,7 @@ export class BackendSplitterService implements SplitterService {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({oldOne: oldResult, newOne: newResult})
+      body: JSON.stringify({oldResult: oldResult, newResult: newResult})
     });
     return await response.json() ?? [];
   }

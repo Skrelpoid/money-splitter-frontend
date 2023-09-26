@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { BackendSplitterServiceService } from './backend-splitter.service';
+import { BackendSplitterService } from './backend-splitter.service';
 
-describe('BackendSplitterServiceService', () => {
-  let service: BackendSplitterServiceService;
+describe('BackendSplitterService', () => {
+  let service: BackendSplitterService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(BackendSplitterServiceService);
+    service = TestBed.inject(BackendSplitterService);
   });
 
   it('should be created', () => {
