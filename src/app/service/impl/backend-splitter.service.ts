@@ -7,7 +7,7 @@ import { SplitResult } from '../../split-result';
 })
 export class BackendSplitterService implements SplitterService {
 
-  private baseUrl = 'https://aged-brook-3167.fly.dev/money-splitter-backend';
+  private baseUrl = 'https://skrelpoid-money-splitter-backend.onrender.com/money-splitter-backend';
   private splitUrl = this.baseUrl + '/split?money=';
   private diffUrl = this.baseUrl + '/calcDiff';
 
